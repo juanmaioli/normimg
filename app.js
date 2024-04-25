@@ -6,7 +6,7 @@ async function procesarImagen() {
   try {
     // Configura los argumentos de la línea de comandos usando yargs
     const argv = yargs
-      .usage('Usage: node app.js --input [filename] -s [new side size ]-c [compression] -b [Side blur]')
+      .usage('Usage: node app.js --input [filename] -s [new side size ] -c [compression] -b [Side blur]')
       .demandOption(['input']) // Requiere que los argumentos input y output sean proporcionados
       .argv
 
