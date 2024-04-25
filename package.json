@@ -1,0 +1,18 @@
+{
+  "name": "normimg",
+  "version": "1.0.0",
+  "description": "Normaliza una imagen en formato cuadrado rellenado bordes con la misma imagen blurreada",
+  "main": "app.js",
+  "bin": {
+    "normimg": "app.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Juan Maioli",
+  "license": "ISC",
+  "dependencies": {
+    "jimp": "^0.22.12",
+    "yargs": "^17.7.2"
+  }
+}
