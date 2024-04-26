@@ -1,4 +1,4 @@
-# 🚀 Norm IMG
+# 🤖 Norm IMG 🧉
 
 Normaliza una imagen en formato cuadrado rellenado bordes con la misma imagen blurreada.
 
