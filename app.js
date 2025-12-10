@@ -1,4 +1,5 @@
-const yargs = require('yargs');
+const yargs = require('yargs/yargs');
+const { hideBin } = require('yargs/helpers');
 const path = require('path');
 const { normalizaFotoCuadrada } = require('./imagenFunciones');
 
@@ -6,7 +7,7 @@ const { normalizaFotoCuadrada } = require('./imagenFunciones');
 async function main() {
   try {
     // Configura los argumentos de la línea de comandos usando yargs
-    const argv = yargs
+    const argv = yargs(hideBin(process.argv))
       .usage('Usage: $0 --input <filename> [options]')
       .option('i', {
         alias: 'input',
