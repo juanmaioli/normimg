@@ -12,8 +12,9 @@ const Jimp = require('jimp')
  */
 async function normalizaFotoCuadrada(urlImagen, urlImagenFinal, desenfoque = 40, tamanioLado = 1000, calidad = 80) {
   try {
-    // 1. Lee la imagen original una sola vez
-    const imagenOriginal = await Jimp.read(urlImagen);
+    // 1. Lee la imagen original una sola vez, manejando el cambio de API en Jimp v1
+    const jimpInstance = Jimp.default || Jimp;
+    const imagenOriginal = await jimpInstance.read(urlImagen);
 
     // 2. Clona la imagen original para crear el fondo
     const fondo = imagenOriginal.clone();
