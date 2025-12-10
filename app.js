@@ -1,30 +1,70 @@
-const yargs = require('yargs')
-const procesaImagen = require('./imagenFunciones')
+const yargs = require('yargs');
+const path = require('path');
+const { normalizaFotoCuadrada } = require('./imagenFunciones');
 
-// Función asíncrona para procesar la imagen
-async function procesarImagen() {
+// Función asíncrona principal
+async function main() {
   try {
     // Configura los argumentos de la línea de comandos usando yargs
     const argv = yargs
-      .usage('Usage: node app.js --input [filename] -s [new side size ] -c [compression] -b [Side blur]')
-      .demandOption(['input']) // Requiere que los argumentos input y output sean proporcionados
-      .argv
+      .usage('Usage: $0 --input <filename> [options]')
+      .option('i', {
+        alias: 'input',
+        demandOption: true,
+        describe: 'Input image file path',
+        type: 'string'
+      })
+      .option('o', {
+        alias: 'output',
+        describe: 'Output image file path',
+        type: 'string'
+      })
+      .option('s', {
+        alias: 'size',
+        default: 1000,
+        describe: 'Side size of the final square image in pixels',
+        type: 'number'
+      })
+      .option('c', {
+        alias: 'compression',
+        default: 80,
+        describe: 'JPG compression quality (0-100)',
+        type: 'number'
+      })
+      .option('b', {
+        alias: 'blur',
+        default: 40,
+        describe: 'Blur level for the background (0-100)',
+        type: 'number'
+      })
+      .help('h')
+      .alias('h', 'help')
+      .argv;
 
-    // Lee el nombre del archivo de entrada y de salida desde los argumentos de la línea de comandos
-    const inputFile = argv.input
-    const size = argv.s ? argv.s:1000
-    const compression = argv.c ? argv.c : 80
-    const blur = argv.b ? argv.b: 40
+    // Define la ruta de entrada
+    const inputFile = argv.input;
 
-    // Llama a procesaImagen.normalizaFotoCuadrada utilizando await
-    await procesaImagen.normalizaFotoCuadrada(inputFile,blur, size, compression)
+    // Define la ruta de salida. Si no se proporciona, crea un nombre por defecto.
+    const outputFile = argv.output || (() => {
+      const inputPath = path.parse(inputFile);
+      return path.join(inputPath.dir, `${inputPath.name}_final${inputPath.ext}`);
+    })();
 
-    // Muestra un mensaje de consola indicando que ha terminado
-    console.log('Proceso completado.')
+    // Lee las opciones de procesamiento
+    const { blur, size, compression } = argv;
+
+    console.log(`Procesando ${inputFile}...`);
+
+    // Llama a la función de procesamiento de imagen con los argumentos correctos
+    await normalizaFotoCuadrada(inputFile, outputFile, blur, size, compression);
+
+    console.log('✅ Proceso completado.');
+    console.log(`Imagen guardada en: ${outputFile}`);
+
   } catch (error) {
-    console.error('Error al procesar la imagen:', error)
+    console.error('❌ Error al procesar la imagen:', error.message);
   }
 }
 
-// Llama a la función asíncrona para procesar la imagen
-procesarImagen()
+// Llama a la función principal
+main();
