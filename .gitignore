@@ -31,3 +31,6 @@ yarn-error.log*
 /dev
 package-lock.json
 .eslintrc.json
+
+# Test assets
+/test-assets/

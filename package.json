@@ -7,12 +7,15 @@
     "normimg": "app.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "author": "Juan Maioli",
   "license": "ISC",
   "dependencies": {
     "jimp": "^0.22.12",
     "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0"
   }
 }
