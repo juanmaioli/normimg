@@ -1,32 +1,27 @@
 # 🤖 NormIMG 🧉
 
-Una herramienta de línea de comandos para normalizar imágenes a un formato cuadrado, rellenando los bordes con una versión desenfocada de la misma imagen.
+Una herramienta de línea de comandos y librería para normalizar imágenes a un formato cuadrado, rellenando los bordes con una versión desenfocada de la misma imagen.
 
-### 1. 📦 Instalación
+### 1. 📦 Instalación (CLI Global)
 
-Para usar esta herramienta, primero clona el repositorio e instala las dependencias:
+Para usar la herramienta de línea de comandos en cualquier parte de tu sistema, instálala de forma global:
 
 ```bash
-# Clona el repositorio (si aún no lo has hecho)
-# git clone <URL_DEL_REPOSITORIO>
-# cd NormIMG
-
-# Instala las dependencias con pnpm
-pnpm install
+npm install -g normimg
 ```
 
-### 2. 🚀 Uso
+### 2. 🚀 Uso como Herramienta de Comandos (CLI)
 
-La herramienta puede procesar tanto un **archivo individual** como un **directorio completo** de imágenes (modo lote).
+Una vez instalado, puedes usar el comando `normimg` directamente en tu terminal.
 
 #### A. Procesar un Archivo Individual
 ```bash
-node app.js --input <ruta_al_archivo> [opciones]
+normimg --input <ruta_al_archivo> [opciones]
 ```
 
 #### B. Procesar un Directorio Completo
 ```bash
-node app.js --input <ruta_al_directorio> --output <directorio_de_salida> [opciones]
+normimg --input <ruta_al_directorio> --output <directorio_de_salida> [opciones]
 ```
 
 ### 3. ⚙️ Opciones Disponibles
@@ -40,37 +35,47 @@ node app.js --input <ruta_al_directorio> --output <directorio_de_salida> [opcion
 | `--blur`          | `-b`         | El nivel de desenfoque para el fondo (0-100).                              | `40`                                               |
 | `--help`          | `-h`         | Muestra el menú de ayuda.                                                  | N/A                                                |
 
-### 4. ✨ Ejemplos
+### 4. ✨ Ejemplos (CLI)
 
-#### Ejemplo 1: Imagen Individual (Horizontal)
+#### Ejemplo 1: Imagen Individual
 ```bash
-node app.js --input ./img/img1.jpg --size 600 --compression 100 --blur 50
+normimg --input ./img/img1.jpg --size 600 --compression 100 --blur 50
 ```
 
-**Original:**
-![alt text](img/img1.jpg)
-
-**Resultado:**
-![alt text](img/img1_final.jpg)
+#### Ejemplo 2: Procesar una Carpeta Completa
+Este comando tomará todas las imágenes de `img/`, las procesará a 500px y las guardará en `imagenes-procesadas/`.
+```bash
+normimg --input ./img --output ./imagenes-procesadas --size 500
+```
 
 ---
 
-#### Ejemplo 2: Imagen Individual (Vertical)
+### 5. 📚 Uso como Librería
+
+También puedes usar la función de normalización en tus propios proyectos de Node.js.
+
+#### A. Instalación como Dependencia
 ```bash
-node app.js --input ./img/img2.jpg --size 800 --compression 100 --blur 20
+npm install normimg
 ```
 
-**Original:**
-![alt text](img/img2.jpg)
+#### B. Ejemplo de Uso en tu Código
+```javascript
+const { normalizaFotoCuadrada } = require('normimg');
+const path = require('path');
 
-**Resultado:**
-![alt text](img/img2_final.jpg)
+const imagenEntrada = path.join(__dirname, 'mi-foto.jpg');
+const imagenSalida = path.join(__dirname, 'mi-foto-cuadrada.jpg');
 
----
+async function procesar() {
+  try {
+    console.log('Normalizando imagen...');
+    await normalizaFotoCuadrada(imagenEntrada, imagenSalida, 40, 1200, 90);
+    console.log(`Imagen guardada en ${imagenSalida}`);
+  } catch (error) {
+    console.error('Ocurrió un error:', error.message);
+  }
+}
 
-#### Ejemplo 3: Procesar una Carpeta Completa
-Este comando tomará todas las imágenes de la carpeta `img`, las procesará a un tamaño de 500px y las guardará en una nueva carpeta llamada `imagenes-procesadas`.
-
-```bash
-node app.js --input ./img --output ./imagenes-procesadas --size 500
+procesar();
 ```

@@ -1,16 +1,32 @@
 {
   "name": "normimg",
   "version": "1.0.0",
-  "description": "Normaliza una imagen en formato cuadrado rellenado bordes con la misma imagen blurreada",
-  "main": "app.js",
+  "description": "Normaliza una imagen en formato cuadrado rellenado bordes con la misma imagen blurreada.",
+  "main": "imagenFunciones.js",
   "bin": {
     "normimg": "app.js"
   },
+  "files": [
+    "app.js",
+    "imagenFunciones.js"
+  ],
   "scripts": {
     "test": "jest"
   },
+  "keywords": [
+    "image",
+    "normalize",
+    "square",
+    "jimp",
+    "cli",
+    "image-processing"
+  ],
   "author": "Juan Maioli",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/juanmaioli/normimg"
+  },
   "dependencies": {
     "jimp": "^0.22.12",
     "yargs": "^17.7.2"
