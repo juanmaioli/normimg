@@ -2,7 +2,7 @@ const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 const path = require('path');
 const fs = require('fs/promises');
-const { normalizaFotoCuadrada } = require('./imagenFunciones');
+const { normalizaFoto } = require('./imagenFunciones');
 
 // Función asíncrona principal
 async function main() {
@@ -24,7 +24,17 @@ async function main() {
       .option('s', {
         alias: 'size',
         default: 1000,
-        describe: 'Tamaño en píxeles del lado de la imagen final',
+        describe: 'Tamaño del lado (para formato cuadrado). Ignorado si se usan -w y -h.',
+        type: 'number'
+      })
+      .option('w', {
+        alias: 'width',
+        describe: 'Ancho final en píxeles',
+        type: 'number'
+      })
+      .option('H', {
+        alias: 'height',
+        describe: 'Alto final en píxeles',
         type: 'number'
       })
       .option('c', {
@@ -44,7 +54,13 @@ async function main() {
       .argv;
 
     const inputPath = argv.input;
-    const { blur, size, compression } = argv;
+    const { blur, size, compression, width, height } = argv;
+    
+    // Determinar dimensiones finales
+    // Si se especifican width y height, se usan. Si no, se usa size para ambos (cuadrado).
+    const finalWidth = width || size;
+    const finalHeight = height || size;
+
     const stats = await fs.stat(inputPath);
 
     if (stats.isDirectory()) {
@@ -61,12 +77,12 @@ async function main() {
         return;
       }
 
-      console.log(`🖼️  Se encontraron ${imageFiles.length} imágenes. Procesando...`);
+      console.log(`🖼️  Se encontraron ${imageFiles.length} imágenes. Procesando a ${finalWidth}x${finalHeight}px...`);
 
       const processingPromises = imageFiles.map(file => {
         const inputFile = path.join(inputPath, file);
-        const outputFile = path.join(outputDir, `${path.parse(file).name}_cuadrada.jpg`);
-        return normalizaFotoCuadrada(inputFile, outputFile, blur, size, compression)
+        const outputFile = path.join(outputDir, `${path.parse(file).name}_procesada.jpg`);
+        return normalizaFoto(inputFile, outputFile, blur, finalWidth, finalHeight, compression)
           .then(() => console.log(`  ✓ ${file} -> ${outputFile}`))
           .catch(err => console.error(`  ✗ Error con ${file}: ${err.message}`));
       });
@@ -81,8 +97,8 @@ async function main() {
         return path.join(parsedPath.dir, `${parsedPath.name}_final${parsedPath.ext}`);
       })();
 
-      console.log(`🖼️  Procesando archivo: ${inputPath}...`);
-      await normalizaFotoCuadrada(inputPath, outputFile, blur, size, compression);
+      console.log(`🖼️  Procesando archivo: ${inputPath} a ${finalWidth}x${finalHeight}px...`);
+      await normalizaFoto(inputPath, outputFile, blur, finalWidth, finalHeight, compression);
       console.log(`✅ Proceso completado. Imagen guardada en: ${outputFile}`);
     
     } else {

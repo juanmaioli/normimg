@@ -1,7 +1,7 @@
 {
   "name": "normimg",
-  "version": "1.0.0",
-  "description": "Normaliza una imagen en formato cuadrado rellenado bordes con la misma imagen blurreada.",
+  "version": "1.1.0",
+  "description": "Normaliza una imagen en formato cuadrado rellenado bordes con la misma imagen blurreada",
   "main": "imagenFunciones.js",
   "bin": {
     "normimg": "app.js"
