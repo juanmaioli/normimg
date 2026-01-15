@@ -35,3 +35,4 @@ package-lock.json
 # Test assets
 /test-assets/
 *.tgz
+GEMINI.md
