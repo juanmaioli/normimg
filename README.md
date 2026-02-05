@@ -35,24 +35,29 @@ normimg --input <ruta_al_directorio> --output <directorio_de_salida> [opciones]
 | `--height`        | `-H`         | El alto final de la imagen en píxeles.                                     | `size`                                             |
 | `--compression`   | `-c`         | La calidad de compresión JPG (0-100).                                      | `80`                                               |
 | `--blur`          | `-b`         | El nivel de desenfoque para el fondo (0-100).                              | `40`                                               |
+| `--white`         | `-W`         | Usa un fondo blanco sólido en lugar de desenfocado. Ignora dimensiones y usa el lado más largo para ser cuadrado. | `false` |
 | `--help`          | `-h`         | Muestra el menú de ayuda.                                                  | N/A                                                |
 
 ### 4. ✨ Ejemplos (CLI)
 
-#### Ejemplo 1: Imagen Individual (Cuadrada)
+#### Ejemplo 1: Imagen Individual (Cuadrada con Blur)
 ```bash
 normimg --input ./img/img1.jpg --size 600 --compression 100 --blur 50
 ```
 
-#### Ejemplo 2: De Cuadrada a Landscape (16:9)
+#### Ejemplo 2: Imagen con Fondo Blanco (Basado en lado más largo)
+```bash
+normimg --input ./img/img1.jpg --white
+```
+
+#### Ejemplo 3: De Cuadrada a Landscape (16:9)
 ```bash
 normimg --input ./img/cuadrada.jpg --width 1920 --height 1080
 ```
 
-#### Ejemplo 3: Procesar una Carpeta Completa
-Este comando tomará todas las imágenes de `img/`, las procesará a 500px y las guardará en `imagenes-procesadas/`.
+#### Ejemplo 4: Procesar una Carpeta Completa (Fondo Blanco)
 ```bash
-normimg --input ./img --output ./imagenes-procesadas --size 500
+normimg --input ./img --output ./procesadas --white
 ```
 
 ---
@@ -68,18 +73,18 @@ npm install normimg
 
 #### B. Ejemplo de Uso en tu Código
 ```javascript
-const { normalizaFoto } = require('normimg');
+const { normalizaFoto, normalizaFotoCuadradaFondoBlanco } = require('normimg');
 const path = require('path');
-
-const imagenEntrada = path.join(__dirname, 'mi-foto.jpg');
-const imagenSalida = path.join(__dirname, 'mi-foto-final.jpg');
 
 async function procesar() {
   try {
-    console.log('Normalizando imagen...');
-    // Parámetros: input, output, blur, width, height, quality
-    await normalizaFoto(imagenEntrada, imagenSalida, 40, 1920, 1080, 90);
-    console.log(`Imagen guardada en ${imagenSalida}`);
+    // Opción A: Fondo desenfocado (blur)
+    await normalizaFoto('input.jpg', 'output_blur.jpg', 40, 1000, 1000, 90);
+
+    // Opción B: Fondo blanco cuadrado (lado más largo)
+    await normalizaFotoCuadradaFondoBlanco('input.jpg', 'output_white.jpg', 90);
+    
+    console.log('Imágenes procesadas con éxito');
   } catch (error) {
     console.error('Ocurrió un error:', error.message);
   }

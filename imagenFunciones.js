@@ -47,6 +47,42 @@ async function normalizaFoto(urlImagen, urlImagenFinal, desenfoque = 40, ancho =
   }
 }
 
+/**
+ * Normaliza una imagen a formato cuadrado con fondo blanco.
+ * El tamaño del cuadrado será el lado más grande de la imagen original.
+ * @param {string} urlImagen Ruta de la imagen de entrada.
+ * @param {string} urlImagenFinal Ruta de la imagen de salida.
+ * @param {number} calidad Calidad de la compresión JPG (0-100).
+ */
+async function normalizaFotoCuadradaFondoBlanco(urlImagen, urlImagenFinal, calidad = 80) {
+  try {
+    const jimpInstance = Jimp.default || Jimp;
+    const imagenOriginal = await jimpInstance.read(urlImagen);
+
+    const ancho = imagenOriginal.getWidth();
+    const alto = imagenOriginal.getHeight();
+    const ladoMasLargo = Math.max(ancho, alto);
+
+    // Crear un nuevo lienzo cuadrado blanco (0xFFFFFFFF = blanco opaco)
+    const fondo = new jimpInstance(ladoMasLargo, ladoMasLargo, 0xFFFFFFFF);
+
+    // Superponer la imagen original centrada
+    const x = (ladoMasLargo - ancho) / 2;
+    const y = (ladoMasLargo - alto) / 2;
+    fondo.composite(imagenOriginal, x, y);
+
+    // Ajusta la calidad de la imagen final
+    fondo.quality(calidad);
+
+    // Escribe el archivo final
+    await fondo.writeAsync(urlImagenFinal);
+
+  } catch (error) {
+    throw new Error(`Error al procesar la imagen con fondo blanco ${urlImagen}: ${error.message}`);
+  }
+}
+
 module.exports = {
   normalizaFoto,
+  normalizaFotoCuadradaFondoBlanco,
 }

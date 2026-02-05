@@ -2,7 +2,7 @@ const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 const path = require('path');
 const fs = require('fs/promises');
-const { normalizaFoto } = require('./imagenFunciones');
+const { normalizaFoto, normalizaFotoCuadradaFondoBlanco } = require('./imagenFunciones');
 
 // Función asíncrona principal
 async function main() {
@@ -49,12 +49,18 @@ async function main() {
         describe: 'Nivel de desenfoque para el fondo (0-100)',
         type: 'number'
       })
+      .option('W', {
+        alias: 'white',
+        default: false,
+        describe: 'Usar fondo blanco sólido en lugar de desenfocado (ignora size/width/height y usa el lado más largo)',
+        type: 'boolean'
+      })
       .help('h')
       .alias('h', 'help')
       .argv;
 
     const inputPath = argv.input;
-    const { blur, size, compression, width, height } = argv;
+    const { blur, size, compression, width, height, white } = argv;
     
     // Determinar dimensiones finales
     // Si se especifican width y height, se usan. Si no, se usa size para ambos (cuadrado).
@@ -77,14 +83,21 @@ async function main() {
         return;
       }
 
-      console.log(`🖼️  Se encontraron ${imageFiles.length} imágenes. Procesando a ${finalWidth}x${finalHeight}px...`);
+      console.log(`🖼️  Se encontraron ${imageFiles.length} imágenes. Procesando...`);
 
       const processingPromises = imageFiles.map(file => {
         const inputFile = path.join(inputPath, file);
         const outputFile = path.join(outputDir, `${path.parse(file).name}_procesada.jpg`);
-        return normalizaFoto(inputFile, outputFile, blur, finalWidth, finalHeight, compression)
-          .then(() => console.log(`  ✓ ${file} -> ${outputFile}`))
-          .catch(err => console.error(`  ✗ Error con ${file}: ${err.message}`));
+        
+        if (white) {
+          return normalizaFotoCuadradaFondoBlanco(inputFile, outputFile, compression)
+            .then(() => console.log(`  ✓ ${file} -> ${outputFile} (Fondo Blanco)`))
+            .catch(err => console.error(`  ✗ Error con ${file}: ${err.message}`));
+        } else {
+          return normalizaFoto(inputFile, outputFile, blur, finalWidth, finalHeight, compression)
+            .then(() => console.log(`  ✓ ${file} -> ${outputFile} (${finalWidth}x${finalHeight}px)`))
+            .catch(err => console.error(`  ✗ Error con ${file}: ${err.message}`));
+        }
       });
 
       await Promise.all(processingPromises);
@@ -97,8 +110,13 @@ async function main() {
         return path.join(parsedPath.dir, `${parsedPath.name}_final${parsedPath.ext}`);
       })();
 
-      console.log(`🖼️  Procesando archivo: ${inputPath} a ${finalWidth}x${finalHeight}px...`);
-      await normalizaFoto(inputPath, outputFile, blur, finalWidth, finalHeight, compression);
+      if (white) {
+        console.log(`🖼️  Procesando archivo con fondo blanco: ${inputPath}...`);
+        await normalizaFotoCuadradaFondoBlanco(inputPath, outputFile, compression);
+      } else {
+        console.log(`🖼️  Procesando archivo: ${inputPath} a ${finalWidth}x${finalHeight}px...`);
+        await normalizaFoto(inputPath, outputFile, blur, finalWidth, finalHeight, compression);
+      }
       console.log(`✅ Proceso completado. Imagen guardada en: ${outputFile}`);
     
     } else {
