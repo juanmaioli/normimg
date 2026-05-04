@@ -2,7 +2,7 @@ const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 const path = require('path');
 const fs = require('fs/promises');
-const { normalizaFoto, normalizaFotoCuadradaFondoBlanco } = require('./imagenFunciones');
+const { normalizaFoto, normalizaFotoCuadradaFondoBlanco, convertirPngAJpg } = require('./imagenFunciones');
 
 // Función asíncrona principal
 async function main() {
@@ -55,12 +55,18 @@ async function main() {
         describe: 'Usar fondo blanco sólido en lugar de desenfocado (ignora size/width/height y usa el lado más largo)',
         type: 'boolean'
       })
+      .option('P', {
+        alias: 'convert',
+        default: false,
+        describe: 'Solo convertir PNG a JPG (sin redimensionar)',
+        type: 'boolean'
+      })
       .help('h')
       .alias('h', 'help')
       .argv;
 
     const inputPath = argv.input;
-    const { blur, size, compression, width, height, white } = argv;
+    const { blur, size, compression, width, height, white, convert } = argv;
     
     // Determinar dimensiones finales
     // Si se especifican width y height, se usan. Si no, se usa size para ambos (cuadrado).
@@ -75,11 +81,16 @@ async function main() {
       const outputDir = argv.output || 'output'; // Directorio de salida por defecto
       await fs.mkdir(outputDir, { recursive: true });
 
-      const files = await fs.readdir(inputPath);
-      const imageFiles = files.filter(file => /\.(jpg|jpeg|png|bmp|gif)$/i.test(file));
+      let files = await fs.readdir(inputPath);
+      let imageFiles = files.filter(file => /\.(jpg|jpeg|png|bmp|gif)$/i.test(file));
+
+      // Si convert está activo, solo procesamos PNGs
+      if (convert) {
+        imageFiles = imageFiles.filter(file => /\.png$/i.test(file));
+      }
 
       if (imageFiles.length === 0) {
-        console.log('🤷 No se encontraron imágenes en el directorio.');
+        console.log('🤷 No se encontraron imágenes válidas en el directorio.');
         return;
       }
 
@@ -87,9 +98,13 @@ async function main() {
 
       const processingPromises = imageFiles.map(file => {
         const inputFile = path.join(inputPath, file);
-        const outputFile = path.join(outputDir, `${path.parse(file).name}_procesada.jpg`);
+        const outputFile = path.join(outputDir, `${path.parse(file).name}${convert ? '.jpg' : '_procesada.jpg'}`);
         
-        if (white) {
+        if (convert) {
+          return convertirPngAJpg(inputFile, outputFile, compression)
+            .then(() => console.log(`  ✓ ${file} -> ${outputFile} (Conversión)`))
+            .catch(err => console.error(`  ✗ Error con ${file}: ${err.message}`));
+        } else if (white) {
           return normalizaFotoCuadradaFondoBlanco(inputFile, outputFile, compression)
             .then(() => console.log(`  ✓ ${file} -> ${outputFile} (Fondo Blanco)`))
             .catch(err => console.error(`  ✗ Error con ${file}: ${err.message}`));
@@ -107,10 +122,13 @@ async function main() {
       // --- LÓGICA PARA ARCHIVO ÚNICO ---
       const outputFile = argv.output || (() => {
         const parsedPath = path.parse(inputPath);
-        return path.join(parsedPath.dir, `${parsedPath.name}_final${parsedPath.ext}`);
+        return path.join(parsedPath.dir, `${parsedPath.name}${convert ? '.jpg' : '_final' + parsedPath.ext}`);
       })();
 
-      if (white) {
+      if (convert) {
+        console.log(`🖼️  Convirtiendo archivo a JPG: ${inputPath}...`);
+        await convertirPngAJpg(inputPath, outputFile, compression);
+      } else if (white) {
         console.log(`🖼️  Procesando archivo con fondo blanco: ${inputPath}...`);
         await normalizaFotoCuadradaFondoBlanco(inputPath, outputFile, compression);
       } else {

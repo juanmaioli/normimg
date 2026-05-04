@@ -36,6 +36,7 @@ normimg --input <ruta_al_directorio> --output <directorio_de_salida> [opciones]
 | `--compression`   | `-c`         | La calidad de compresión JPG (0-100).                                      | `80`                                               |
 | `--blur`          | `-b`         | El nivel de desenfoque para el fondo (0-100).                              | `40`                                               |
 | `--white`         | `-W`         | Usa un fondo blanco sólido en lugar de desenfocado. Ignora dimensiones y usa el lado más largo para ser cuadrado. | `false` |
+| `--convert`       | `-P`         | Solo convertir PNG a JPG (sin redimensionar ni normalizar).                | `false` |
 | `--help`          | `-h`         | Muestra el menú de ayuda.                                                  | N/A                                                |
 
 ### 4. ✨ Ejemplos (CLI)
@@ -50,14 +51,19 @@ normimg --input ./img/img1.jpg --size 600 --compression 100 --blur 50
 normimg --input ./img/img1.jpg --white
 ```
 
-#### Ejemplo 3: De Cuadrada a Landscape (16:9)
+#### Ejemplo 3: Convertir PNG a JPG (Sin normalizar)
+```bash
+normimg --input ./img/mifoto.png --convert
+```
+
+#### Ejemplo 4: De Cuadrada a Landscape (16:9)
 ```bash
 normimg --input ./img/cuadrada.jpg --width 1920 --height 1080
 ```
 
-#### Ejemplo 4: Procesar una Carpeta Completa (Fondo Blanco)
+#### Ejemplo 5: Procesar una Carpeta Completa (Solo Conversión PNG a JPG)
 ```bash
-normimg --input ./img --output ./procesadas --white
+normimg --input ./img --output ./solo-jpg --convert
 ```
 
 ---
@@ -73,7 +79,7 @@ npm install normimg
 
 #### B. Ejemplo de Uso en tu Código
 ```javascript
-const { normalizaFoto, normalizaFotoCuadradaFondoBlanco } = require('normimg');
+const { normalizaFoto, normalizaFotoCuadradaFondoBlanco, convertirPngAJpg } = require('normimg');
 const path = require('path');
 
 async function procesar() {
@@ -83,6 +89,9 @@ async function procesar() {
 
     // Opción B: Fondo blanco cuadrado (lado más largo)
     await normalizaFotoCuadradaFondoBlanco('input.jpg', 'output_white.jpg', 90);
+
+    // Opción C: Conversión simple PNG -> JPG
+    await convertirPngAJpg('input.png', 'output.jpg', 85);
     
     console.log('Imágenes procesadas con éxito');
   } catch (error) {

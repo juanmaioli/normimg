@@ -1,4 +1,4 @@
-const { normalizaFoto, normalizaFotoCuadradaFondoBlanco } = require('./imagenFunciones');
+const { normalizaFoto, normalizaFotoCuadradaFondoBlanco, convertirPngAJpg } = require('./imagenFunciones');
 const fs = require('fs/promises');
 const path = require('path');
 const Jimp = require('jimp');
@@ -6,18 +6,28 @@ const Jimp = require('jimp');
 // Directorio para los archivos de prueba
 const testDir = path.join(__dirname, 'test-assets');
 const inputPath = path.join(testDir, 'test-image.png');
+const inputPngPath = path.join(testDir, 'test-transparency.png');
 const outputPath = path.join(testDir, 'test-output.jpg');
 const outputRectPath = path.join(testDir, 'test-output-rect.jpg');
 const outputWhitePath = path.join(testDir, 'test-output-white.jpg');
+const outputConvertPath = path.join(testDir, 'test-output-convert.jpg');
 
 describe('imagenFunciones', () => {
   // Antes de todas las pruebas, crea el directorio y una imagen de prueba
   beforeAll(async () => {
     await fs.mkdir(testDir, { recursive: true });
-    // Crea una imagen simple (20x40) para la prueba (roja)
+    
     const jimpInstance = Jimp.default || Jimp;
+    
+    // Crea una imagen simple (20x40) para la prueba (roja)
     const image = new jimpInstance(20, 40, '#ff0000');
     await image.writeAsync(inputPath);
+
+    // Crea una imagen con transparencia (RGBA)
+    const imagePng = new jimpInstance(50, 50, 0x00000000); // Transparente
+    // Ponemos un pixel rojo en el centro
+    imagePng.setPixelColor(0xFF0000FF, 25, 25);
+    await imagePng.writeAsync(inputPngPath);
   });
 
   // Después de todas las pruebas, limpia el directorio
@@ -26,6 +36,7 @@ describe('imagenFunciones', () => {
   });
 
   describe('normalizaFoto', () => {
+    // ... (pruebas existentes)
     // Prueba 1: Proceso exitoso (Cuadrado - Backward Compatibility Logic check)
     test('debería crear una imagen cuadrada con las dimensiones correctas', async () => {
       const size = 200;
@@ -100,6 +111,31 @@ describe('imagenFunciones', () => {
       // 0xFFFFFFFF es -1 en 2's complement para 32-bit signed.
       // Una forma segura es comparar con el valor hexadecimal.
       expect(color).toBe(0xFFFFFFFF);
-    });
-  });
-});
+      });
+      });
+
+      describe('convertirPngAJpg', () => {
+      test('debería convertir una imagen PNG a JPG y rellenar transparencia con blanco', async () => {
+      await convertirPngAJpg(inputPngPath, outputConvertPath, 90);
+
+      // Verifica que el archivo de salida existe
+      const stats = await fs.stat(outputConvertPath);
+      expect(stats.isFile()).toBe(true);
+
+      const jimpInstance = Jimp.default || Jimp;
+      const outputImage = await jimpInstance.read(outputConvertPath);
+
+      // Verificar que el fondo (antes transparente) ahora es blanco
+      const colorEsquina = outputImage.getPixelColor(0, 0);
+      expect(colorEsquina).toBe(0xFFFFFFFF);
+
+      const colorCentro = outputImage.getPixelColor(25, 25);
+      const rgba = jimpInstance.intToRGBA(colorCentro);
+
+      expect(rgba.a).toBe(255); // JPG no tiene transparencia
+      expect(rgba.r).toBeGreaterThan(200); // Debería ser muy rojo
+      expect(rgba.g).toBeLessThan(100);     // Debería tener poco verde
+      expect(rgba.b).toBeLessThan(100);     // Debería tener poco azul
+      });
+      });
+      });

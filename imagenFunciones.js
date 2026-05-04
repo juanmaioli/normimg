@@ -82,7 +82,30 @@ async function normalizaFotoCuadradaFondoBlanco(urlImagen, urlImagenFinal, calid
   }
 }
 
+/**
+ * Convierte una imagen (usualmente PNG) a formato JPG.
+ * @param {string} urlImagen Ruta de la imagen de entrada.
+ * @param {string} urlImagenFinal Ruta de la imagen de salida.
+ * @param {number} calidad Calidad de la compresión JPG (0-100).
+ */
+async function convertirPngAJpg(urlImagen, urlImagenFinal, calidad = 80) {
+  try {
+    const jimpInstance = Jimp.default || Jimp;
+    const imagen = await jimpInstance.read(urlImagen);
+
+    // Creamos un fondo blanco por si la imagen original tiene transparencias
+    const fondoBlanco = new jimpInstance(imagen.getWidth(), imagen.getHeight(), 0xFFFFFFFF);
+    fondoBlanco.composite(imagen, 0, 0);
+
+    fondoBlanco.quality(calidad);
+    await fondoBlanco.writeAsync(urlImagenFinal);
+  } catch (error) {
+    throw new Error(`Error al convertir imagen a JPG ${urlImagen}: ${error.message}`);
+  }
+}
+
 module.exports = {
   normalizaFoto,
   normalizaFotoCuadradaFondoBlanco,
+  convertirPngAJpg,
 }
