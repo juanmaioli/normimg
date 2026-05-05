@@ -23,7 +23,6 @@ async function main() {
       })
       .option('s', {
         alias: 'size',
-        default: 1000,
         describe: 'Tamaño del lado (para formato cuadrado). Ignorado si se usan -w y -h.',
         type: 'number'
       })
@@ -69,9 +68,11 @@ async function main() {
     const { blur, size, compression, width, height, white, convert } = argv;
     
     // Determinar dimensiones finales
-    // Si se especifican width y height, se usan. Si no, se usa size para ambos (cuadrado).
+    // Si se especifican width o height, se usan esos. Si se usa size, se usa para los faltantes.
+    // Si no se especifica nada, se pasan como undefined para usar el tamaño original.
     const finalWidth = width || size;
     const finalHeight = height || size;
+    const dimensionLog = (finalWidth && finalHeight) ? `${finalWidth}x${finalHeight}px` : 'Original';
 
     const stats = await fs.stat(inputPath);
 
@@ -110,7 +111,7 @@ async function main() {
             .catch(err => console.error(`  ✗ Error con ${file}: ${err.message}`));
         } else {
           return normalizaFoto(inputFile, outputFile, blur, finalWidth, finalHeight, compression)
-            .then(() => console.log(`  ✓ ${file} -> ${outputFile} (${finalWidth}x${finalHeight}px)`))
+            .then(() => console.log(`  ✓ ${file} -> ${outputFile} (${dimensionLog})`))
             .catch(err => console.error(`  ✗ Error con ${file}: ${err.message}`));
         }
       });
@@ -132,7 +133,7 @@ async function main() {
         console.log(`🖼️  Procesando archivo con fondo blanco: ${inputPath}...`);
         await normalizaFotoCuadradaFondoBlanco(inputPath, outputFile, compression);
       } else {
-        console.log(`🖼️  Procesando archivo: ${inputPath} a ${finalWidth}x${finalHeight}px...`);
+        console.log(`🖼️  Procesando archivo: ${inputPath} a ${dimensionLog}...`);
         await normalizaFoto(inputPath, outputFile, blur, finalWidth, finalHeight, compression);
       }
       console.log(`✅ Proceso completado. Imagen guardada en: ${outputFile}`);

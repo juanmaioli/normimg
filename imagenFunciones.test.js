@@ -76,13 +76,28 @@ describe('imagenFunciones', () => {
       expect(outputImage.getHeight()).toBe(height);
     });
 
-    // Prueba 3: Manejo de errores
+    // Prueba 3: Dimensiones originales por defecto
+    test('debería usar las dimensiones originales si no se proporcionan ancho ni alto', async () => {
+      const quality = 90;
+      const blur = 10;
+
+      // La imagen original creada en beforeAll es de 20x40
+      await normalizaFoto(inputPath, outputPath, blur, null, null, quality);
+
+      const jimpInstance = Jimp.default || Jimp;
+      const outputImage = await jimpInstance.read(outputPath);
+      
+      expect(outputImage.getWidth()).toBe(20);
+      expect(outputImage.getHeight()).toBe(40);
+    });
+
+    // Prueba 4: Manejo de errores
     test('debería lanzar un error si el archivo de entrada no existe', async () => {
       const nonExistentInput = path.join(testDir, 'no-existe.png');
       
       // Espera que la promesa sea rechazada con un error
       await expect(
-        normalizaFoto(nonExistentInput, outputPath, 40, 1000, 1000, 80)
+        normalizaFoto(nonExistentInput, outputPath, 40, null, null, 80)
       ).rejects.toThrow();
     });
   });

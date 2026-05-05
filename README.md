@@ -30,9 +30,9 @@ normimg --input <ruta_al_directorio> --output <directorio_de_salida> [opciones]
 | ----------------- | ------------ | -------------------------------------------------------------------------- | -------------------------------------------------- |
 | `--input`         | `-i`         | **(Requerido)** Ruta al **archivo** o **directorio** de entrada.             | N/A                                                |
 | `--output`        | `-o`         | Ruta de salida. Si es un dir, el defecto es `./output`. Si es un archivo, se añade `_final`. | N/A                                                |
-| `--size`          | `-s`         | El tamaño en píxeles para el lado de la imagen (formato cuadrado). Ignorado si se usan `-w` y `-H`. | `1000`                                             |
-| `--width`         | `-w`         | El ancho final de la imagen en píxeles.                                    | `size`                                             |
-| `--height`        | `-H`         | El alto final de la imagen en píxeles.                                     | `size`                                             |
+| `--size`          | `-s`         | El tamaño en píxeles para el lado de la imagen (formato cuadrado). Ignorado si se usan `-w` y `-H`. | `Original`                                         |
+| `--width`         | `-w`         | El ancho final de la imagen en píxeles.                                    | `size` o `Original`                                |
+| `--height`        | `-H`         | El alto final de la imagen en píxeles.                                     | `size` o `Original`                                |
 | `--compression`   | `-c`         | La calidad de compresión JPG (0-100).                                      | `80`                                               |
 | `--blur`          | `-b`         | El nivel de desenfoque para el fondo (0-100).                              | `40`                                               |
 | `--white`         | `-W`         | Usa un fondo blanco sólido en lugar de desenfocado. Ignora dimensiones y usa el lado más largo para ser cuadrado. | `false` |
@@ -41,27 +41,32 @@ normimg --input <ruta_al_directorio> --output <directorio_de_salida> [opciones]
 
 ### 4. ✨ Ejemplos (CLI)
 
-#### Ejemplo 1: Imagen Individual (Cuadrada con Blur)
+#### Ejemplo 1: Imagen Individual (Dimensiones Originales con Blur)
 ```bash
-normimg --input ./img/img1.jpg --size 600 --compression 100 --blur 50
+normimg --input ./img/img1.jpg --compression 100 --blur 50
 ```
 
-#### Ejemplo 2: Imagen con Fondo Blanco (Basado en lado más largo)
+#### Ejemplo 2: Forzar Tamaño Cuadrado (600x600)
+```bash
+normimg --input ./img/img1.jpg --size 600
+```
+
+#### Ejemplo 3: Imagen con Fondo Blanco (Basado en lado más largo)
 ```bash
 normimg --input ./img/img1.jpg --white
 ```
 
-#### Ejemplo 3: Convertir PNG a JPG (Sin normalizar)
+#### Ejemplo 4: Convertir PNG a JPG (Sin normalizar)
 ```bash
 normimg --input ./img/mifoto.png --convert
 ```
 
-#### Ejemplo 4: De Cuadrada a Landscape (16:9)
+#### Ejemplo 5: De Cuadrada a Landscape (16:9)
 ```bash
 normimg --input ./img/cuadrada.jpg --width 1920 --height 1080
 ```
 
-#### Ejemplo 5: Procesar una Carpeta Completa (Solo Conversión PNG a JPG)
+#### Ejemplo 6: Procesar una Carpeta Completa (Solo Conversión PNG a JPG)
 ```bash
 normimg --input ./img --output ./solo-jpg --convert
 ```
@@ -84,13 +89,16 @@ const path = require('path');
 
 async function procesar() {
   try {
-    // Opción A: Fondo desenfocado (blur)
-    await normalizaFoto('input.jpg', 'output_blur.jpg', 40, 1000, 1000, 90);
+    // Opción A: Fondo desenfocado (usa dimensiones originales por defecto si se pasan como null)
+    await normalizaFoto('input.jpg', 'output_blur.jpg', 40, null, null, 90);
 
-    // Opción B: Fondo blanco cuadrado (lado más largo)
+    // Opción B: Forzar tamaño específico
+    await normalizaFoto('input.jpg', 'output_600.jpg', 40, 600, 600, 90);
+
+    // Opción C: Fondo blanco cuadrado (lado más largo)
     await normalizaFotoCuadradaFondoBlanco('input.jpg', 'output_white.jpg', 90);
 
-    // Opción C: Conversión simple PNG -> JPG
+    // Opción D: Conversión simple PNG -> JPG
     await convertirPngAJpg('input.png', 'output.jpg', 85);
     
     console.log('Imágenes procesadas con éxito');

@@ -7,32 +7,36 @@ const Jimp = require('jimp')
  * @param {string} urlImagen Ruta de la imagen de entrada.
  * @param {string} urlImagenFinal Ruta de la imagen de salida.
  * @param {number} desenfoque Nivel de desenfoque para el fondo (0-100).
- * @param {number} ancho Ancho en píxeles de la imagen final.
- * @param {number} alto Alto en píxeles de la imagen final.
+ * @param {number} [ancho=null] Ancho en píxeles de la imagen final. Si es null, usa el original.
+ * @param {number} [alto=null] Alto en píxeles de la imagen final. Si es null, usa el original.
  * @param {number} calidad Calidad de la compresión JPG (0-100).
  */
-async function normalizaFoto(urlImagen, urlImagenFinal, desenfoque = 40, ancho = 1000, alto = 1000, calidad = 80) {
+async function normalizaFoto(urlImagen, urlImagenFinal, desenfoque = 40, ancho = null, alto = null, calidad = 80) {
   try {
     // 1. Lee la imagen original una sola vez, manejando el cambio de API en Jimp v1
     const jimpInstance = Jimp.default || Jimp;
     const imagenOriginal = await jimpInstance.read(urlImagen);
 
+    // Si no se proporcionan dimensiones, usar las originales
+    const anchoFinal = ancho || imagenOriginal.getWidth();
+    const altoFinal = alto || imagenOriginal.getHeight();
+
     // 2. Clona la imagen original para crear el fondo
     const fondo = imagenOriginal.clone();
 
     // 3. Procesa el fondo: desenfoque y redimensión al tamaño objetivo
-    // Al hacer resize directo a (ancho, alto), la imagen se estira para cubrir todo el lienzo,
+    // Al hacer resize directo a (anchoFinal, altoFinal), la imagen se estira para cubrir todo el lienzo,
     // lo cual es deseable para el efecto de fondo desenfocado.
     fondo.blur(desenfoque);
-    fondo.resize(ancho, alto);
+    fondo.resize(anchoFinal, altoFinal);
 
     // 4. Redimensiona la imagen original para que quepa dentro del nuevo lienzo (contain)
     // manteniendo su relación de aspecto.
-    imagenOriginal.scaleToFit(ancho, alto);
+    imagenOriginal.scaleToFit(anchoFinal, altoFinal);
 
     // 5. Superpone la imagen original centrada sobre el fondo
-    const x = (ancho - imagenOriginal.getWidth()) / 2;
-    const y = (alto - imagenOriginal.getHeight()) / 2;
+    const x = (anchoFinal - imagenOriginal.getWidth()) / 2;
+    const y = (altoFinal - imagenOriginal.getHeight()) / 2;
     fondo.composite(imagenOriginal, x, y);
 
     // 6. Ajusta la calidad de la imagen final
