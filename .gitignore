@@ -28,7 +28,7 @@ yarn-debug.log*
 yarn-error.log*
 .pnp.*
 .pnp.js
-/dev
+.dev/
 package-lock.json
 .eslintrc.json
 
@@ -36,3 +36,4 @@ package-lock.json
 /test-assets/
 *.tgz
 GEMINI.md
+web-ui/

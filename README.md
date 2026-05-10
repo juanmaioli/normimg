@@ -109,3 +109,10 @@ async function procesar() {
 
 procesar();
 ```
+
+---
+
+### 📝 Historial de Versiones
+
+- **v1.4.1**: 🛠️ Mejoras en la configuración de archivos ignorados (`.gitignore`).
+- **v1.4.0**: 🚀 Lanzamiento inicial con soporte para normalización, fondo blanco y conversión PNG a JPG.
